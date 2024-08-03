@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "933969173371",
+    "project_id": "chat-app-1dbfa",
+    "storage_bucket": "chat-app-1dbfa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933969173371:android:8d0ccf1b4b49846d16fbde",
+        "android_client_info": {
+          "package_name": "com.luna.chatting_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBG58xg_MmSv3NH4InqEz196RKhXKNM2Ps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
