@@ -1,6 +1,10 @@
+import 'package:chatting_app/const.dart';
+import 'package:chatting_app/pages/homePage.dart';
+import 'package:chatting_app/services/authServices.dart';
 import 'package:chatting_app/widgets/customFormField.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get_it/get_it.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,6 +14,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final GetIt _getIt = GetIt.instance;
+  late AuthService _authService;
+
+  // inorder to use form widgett fr validation
+  final GlobalKey<FormState> _loginFormKey = GlobalKey();
+  String? email, password;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _authService = _getIt.get<AuthService>();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,30 +92,44 @@ class _LoginPageState extends State<LoginPage> {
         top: MediaQuery.sizeOf(context).height * 0.05,
       ),
       child: Form(
+          key: _loginFormKey,
           child: Column(
-        // mainAxisSize: MainAxisSize
-        //     .max, //diivie all the unused space evenly between children
-        // mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
+            // mainAxisSize: MainAxisSize
+            //     .max, //diivie all the unused space evenly between children
+            // mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
 
-        children: [
-          CustomFormField(
-            hintText: 'Email',
-            height: MediaQuery.sizeOf(context).height * 0.07,
-          ),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.03,
-          ),
-          CustomFormField(
-            hintText: 'Password',
-            height: MediaQuery.sizeOf(context).height * 0.07,
-          ),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.03,
-          ),
-          _loginButton(),
-        ],
-      )),
+            children: [
+              CustomFormField(
+                hintText: 'Email',
+                height: MediaQuery.sizeOf(context).height * 0.07,
+                validationRegExp: EMAIL_VALIDATION_REGEX,
+                onSaved: (value) {
+                  setState(() {
+                    email = value;
+                  });
+                },
+              ),
+              SizedBox(
+                height: MediaQuery.sizeOf(context).height * 0.03,
+              ),
+              CustomFormField(
+                obscureText: true,
+                hintText: 'Password',
+                height: MediaQuery.sizeOf(context).height * 0.07,
+                validationRegExp: PASSWORD_VALIDATION_REGEX,
+                onSaved: (value) {
+                  setState(() {
+                    password = value;
+                  });
+                },
+              ),
+              SizedBox(
+                height: MediaQuery.sizeOf(context).height * 0.03,
+              ),
+              _loginButton(),
+            ],
+          )),
     );
   }
 
@@ -106,7 +138,19 @@ class _LoginPageState extends State<LoginPage> {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
-        onPressed: () {},
+        onPressed: () async {
+          if (_loginFormKey.currentState?.validate() ??
+              false) //validate will run validators on children of form and then show message accordingly
+          {
+            _loginFormKey.currentState?.save();
+            // debugPrint("$email , $password");
+            bool result = await _authService.login(email!, password!);
+            if (result) {
+              // debugPrint(result.toString());
+Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(),));
+            } else {}
+          }
+        },
         color: Theme.of(context).colorScheme.primary,
         child: const Text(
           "Login",
@@ -125,7 +169,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Don't hav an account?"),
+          Text("Don't have an account?"),
           SizedBox(
             width: 5,
           ),
@@ -138,3 +182,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+
+
+///Form State: When the save method of the FormState is called, it iterates through all its child form fields and invokes their onSaved callbacks, passing the current value of each field to its respective callback.
+
+// Getting the Value: The value parameter in the onSaved callback of your CustomFormField is automatically provided by the form field itself. The FormField widget manages this internally, ensuring that the current value is passed when onSaved is called.
+
