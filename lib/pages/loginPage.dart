@@ -1,5 +1,6 @@
 import 'package:chatting_app/const.dart';
 import 'package:chatting_app/pages/homePage.dart';
+import 'package:chatting_app/services/alertService.dart';
 import 'package:chatting_app/services/authServices.dart';
 import 'package:chatting_app/widgets/customFormField.dart';
 import 'package:flutter/material.dart';
@@ -16,16 +17,26 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final GetIt _getIt = GetIt.instance;
   late AuthService _authService;
+  late AlertService _alertService;
 
   // inorder to use form widgett fr validation
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
   String? email, password;
+
+  void clearFormFields (){
+    _loginFormKey.currentState?.reset();
+    setState(() {
+      email = null;
+      password = null;
+    });
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _authService = _getIt.get<AuthService>();
+    _alertService = _getIt.get<AlertService>();
   }
 
   @override
@@ -148,7 +159,10 @@ class _LoginPageState extends State<LoginPage> {
             if (result) {
               // debugPrint(result.toString());
 Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(),));
-            } else {}
+            } else {
+_alertService.showToast(context: context, text: "Failed to Login, Please try again!", icon: Icons.error);
+clearFormFields();
+            }
           }
         },
         color: Theme.of(context).colorScheme.primary,
