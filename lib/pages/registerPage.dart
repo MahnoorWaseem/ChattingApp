@@ -1,7 +1,10 @@
 import 'dart:io';
 
 import 'package:chatting_app/const.dart';
+import 'package:chatting_app/pages/homePage.dart';
 import 'package:chatting_app/pages/loginPage.dart';
+import 'package:chatting_app/services/alertService.dart';
+import 'package:chatting_app/services/authServices.dart';
 import 'package:chatting_app/services/mediaService.dart';
 import 'package:chatting_app/widgets/customFormField.dart';
 import 'package:flutter/material.dart';
@@ -16,16 +19,30 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final GlobalKey<FormState> _registerFormKey = GlobalKey();
   final GetIt _getIt = GetIt.instance;
   late Mediaservice _mediaservice;
+  late AuthService _authService;
+  late AlertService _alertService;
   File? selectedImage;
   //A File holds a [path] on which operations can be performed.
   String? email, password, name;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _mediaservice = _getIt.get<Mediaservice>();
+    _authService = _getIt.get<AuthService>();
+    _alertService = _getIt.get<AlertService>();
+  }
+
+  void clearFormFields() {
+    _registerFormKey.currentState?.reset();
+    setState(() {
+      email = null;
+      password = null;
+    });
   }
 
   @override
@@ -47,8 +64,13 @@ class _RegisterPageState extends State<RegisterPage> {
       child: Column(
         children: [
           _headerText(),
-          _registerForm(),
-          _createAnAccountLink(),
+          if (!isLoading) _registerForm(),
+          if (!isLoading) _createAnAccountLink(),
+          if (isLoading)
+            const Expanded(
+                child: Center(
+              child: CircularProgressIndicator(),
+            ))
         ],
       ),
     ));
@@ -91,40 +113,41 @@ class _RegisterPageState extends State<RegisterPage> {
         vertical: MediaQuery.sizeOf(context).height * 0.05,
       ),
       child: Form(
+          key: _registerFormKey,
           child: Column(
-        children: [
-          _pfpSelectionField(),
-          SizedBox(
-            height: 20,
-          ),
-          CustomFormField(
-            hintText: 'Name',
-            height: MediaQuery.sizeOf(context).height * 0.10,
-            validationRegExp: NAME_VALIDATION_REGEX,
-            onSaved: (value) {
-              name = value;
-            },
-          ),
-          CustomFormField(
-            hintText: 'Email',
-            height: MediaQuery.sizeOf(context).height * 0.10,
-            validationRegExp: EMAIL_VALIDATION_REGEX,
-            onSaved: (value) {
-              email = value;
-            },
-          ),
-          CustomFormField(
-            hintText: 'Password',
-            height: MediaQuery.sizeOf(context).height * 0.10,
-            validationRegExp: PASSWORD_VALIDATION_REGEX,
-            onSaved: (value) {
-              password = value;
-            },
-            obscureText: true,
-          ),
-          _registerButton(),
-        ],
-      )),
+            children: [
+              _pfpSelectionField(),
+              SizedBox(
+                height: 20,
+              ),
+              CustomFormField(
+                hintText: 'Name',
+                height: MediaQuery.sizeOf(context).height * 0.10,
+                validationRegExp: NAME_VALIDATION_REGEX,
+                onSaved: (value) {
+                  name = value;
+                },
+              ),
+              CustomFormField(
+                hintText: 'Email',
+                height: MediaQuery.sizeOf(context).height * 0.10,
+                validationRegExp: EMAIL_VALIDATION_REGEX,
+                onSaved: (value) {
+                  email = value;
+                },
+              ),
+              CustomFormField(
+                hintText: 'Password',
+                height: MediaQuery.sizeOf(context).height * 0.10,
+                validationRegExp: PASSWORD_VALIDATION_REGEX,
+                onSaved: (value) {
+                  password = value;
+                },
+                obscureText: true,
+              ),
+              _registerButton(),
+            ],
+          )),
     );
   }
 
@@ -154,8 +177,50 @@ class _RegisterPageState extends State<RegisterPage> {
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
         color: Theme.of(context).colorScheme.primary,
-        onPressed: () {
-
+        onPressed: () async {
+          setState(() {
+            isLoading = true;
+          });
+          try {
+            if ((_registerFormKey.currentState?.validate() ?? false) &&
+                selectedImage != null) {
+              _registerFormKey.currentState?.save();
+              bool result = await _authService.signup(email!, password!);
+              if (result) {
+                _alertService.showToast(
+                    context: context,
+                    text: "Successfully registered!",
+                    icon: Icons.check);
+                clearFormFields();
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HomePage(),
+                    ));
+              } else {
+                _alertService.showToast(
+                    context: context,
+                    text: "Failed to register!",
+                    icon: Icons.error);
+              }
+            } else {
+              if (selectedImage == null) {
+                _alertService.showToast(
+                    context: context,
+                    text: 'Provide profile picture',
+                    icon: Icons.error);
+              }
+            }
+          } catch (e) {
+            _alertService.showToast(
+                context: context,
+                text: "Failed to register!",
+                icon: Icons.error);
+            // clearFormFields();
+          }
+          setState(() {
+            isLoading = false;
+          });
         },
         child: const Text(
           "Register",

@@ -35,7 +35,7 @@ class AuthService {
   User? _user;
 
   User? get user {
-    return _user; 
+    return _user;
   } //Keyword: get
 // This keyword defines the function as a getter.
 
@@ -62,12 +62,26 @@ class AuthService {
     return _user != null;
   }
 
-  Future<bool> logout() async{
+  Future<bool> logout() async {
     try {
       await _firebaseAuth.signOut();
       return true;
     } catch (e) {
       debugPrint(e.toString());
+    }
+    return false;
+  }
+
+  Future<bool> signup(String email, String password) async {
+    try {
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      if (credential.user != null) {
+        _user = credential.user;
+        return true;
+      }
+    } catch (e) {
+      print(e);
     }
     return false;
   }
