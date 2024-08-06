@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:chatting_app/const.dart';
 import 'package:chatting_app/pages/homePage.dart';
+import 'package:chatting_app/pages/registerPage.dart';
 import 'package:chatting_app/services/alertService.dart';
 import 'package:chatting_app/services/authServices.dart';
 import 'package:chatting_app/widgets/customFormField.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get_it/get_it.dart';
 
@@ -158,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
             bool result = await _authService.login(email!, password!);
             if (result) {
               // debugPrint(result.toString());
-Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(),));
+Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(),));
             } else {
 _alertService.showToast(context: context, text: "Failed to Login, Please try again!", icon: Icons.error);
 clearFormFields();
@@ -178,7 +182,7 @@ clearFormFields();
 
   //3. bottom Link
   Widget _createAnAccountLink() {
-    return const Padding(
+    return  Padding(
       padding: EdgeInsets.only(top: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -187,9 +191,14 @@ clearFormFields();
           SizedBox(
             width: 5,
           ),
-          Text(
-            "Sign Up",
-            style: TextStyle(fontWeight: FontWeight.w800),
+          GestureDetector(
+            onTap:(){
+Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage(),));
+            },
+            child: Text(
+              "Sign Up",
+              style: TextStyle(fontWeight: FontWeight.w800),
+            ),
           ),
         ],
       ),

@@ -35,8 +35,9 @@ class AuthService {
   User? _user;
 
   User? get user {
-    return _user;
-  }
+    return _user; 
+  } //Keyword: get
+// This keyword defines the function as a getter.
 
   AuthService() {
     _user = _firebaseAuth.currentUser;

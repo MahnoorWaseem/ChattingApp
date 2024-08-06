@@ -1,6 +1,7 @@
 import 'package:chatting_app/firebase_options.dart';
 import 'package:chatting_app/services/alertService.dart';
 import 'package:chatting_app/services/authServices.dart';
+import 'package:chatting_app/services/mediaService.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_it/get_it.dart';
 
@@ -16,4 +17,7 @@ Future<void> registerServices() async {
   getIt.registerSingleton<AuthService>(AuthService());
 
   getIt.registerSingleton<AlertService>(AlertService());
+
+  getIt.registerSingleton<Mediaservice>(Mediaservice());
+  
 }
