@@ -1,11 +1,14 @@
 import 'dart:io';
 
 import 'package:chatting_app/const.dart';
+import 'package:chatting_app/models/userProfile.dart';
 import 'package:chatting_app/pages/homePage.dart';
 import 'package:chatting_app/pages/loginPage.dart';
 import 'package:chatting_app/services/alertService.dart';
 import 'package:chatting_app/services/authServices.dart';
+import 'package:chatting_app/services/databaseService.dart';
 import 'package:chatting_app/services/mediaService.dart';
+import 'package:chatting_app/services/storageService.dart';
 import 'package:chatting_app/widgets/customFormField.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -24,6 +27,8 @@ class _RegisterPageState extends State<RegisterPage> {
   late Mediaservice _mediaservice;
   late AuthService _authService;
   late AlertService _alertService;
+  late StorageService _storageService;
+  late DatabaseService _databaseService;
   File? selectedImage;
   //A File holds a [path] on which operations can be performed.
   String? email, password, name;
@@ -35,6 +40,8 @@ class _RegisterPageState extends State<RegisterPage> {
     _mediaservice = _getIt.get<Mediaservice>();
     _authService = _getIt.get<AuthService>();
     _alertService = _getIt.get<AlertService>();
+    _storageService = _getIt.get<StorageService>();
+    _databaseService = _getIt.get<DatabaseService>();
   }
 
   void clearFormFields() {
@@ -42,6 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() {
       email = null;
       password = null;
+      selectedImage = null;
     });
   }
 
@@ -187,21 +195,32 @@ class _RegisterPageState extends State<RegisterPage> {
               _registerFormKey.currentState?.save();
               bool result = await _authService.signup(email!, password!);
               if (result) {
-                _alertService.showToast(
-                    context: context,
-                    text: "Successfully registered!",
-                    icon: Icons.check);
-                clearFormFields();
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(),
-                    ));
+                String? pfpURL = await _storageService.uploadUserPfp(
+                    file: selectedImage!, uid: _authService.user!.uid);
+                if (pfpURL != null) {
+                  await _databaseService.createUserProfile(
+                      userProfile: UserProfile(
+                          uid: _authService.user!.uid,
+                          name: name,
+                          pfpURL: pfpURL));
+                  _alertService.showToast(
+                      context: context,
+                      text: "Successfully registered!",
+                      icon: Icons.check);
+                  clearFormFields();
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => HomePage(),
+                      ));
+                }
               } else {
                 _alertService.showToast(
                     context: context,
                     text: "Failed to register!",
                     icon: Icons.error);
+                clearFormFields();
+                throw Exception("Unable to register user");
               }
             } else {
               if (selectedImage == null) {
@@ -216,7 +235,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 context: context,
                 text: "Failed to register!",
                 icon: Icons.error);
-            // clearFormFields();
+            print("error is $e");
+            clearFormFields();
           }
           setState(() {
             isLoading = false;
