@@ -1,3 +1,4 @@
+import 'package:chatting_app/models/chat.dart';
 import 'package:chatting_app/models/message.dart';
 import 'package:chatting_app/models/userProfile.dart';
 import 'package:chatting_app/services/authServices.dart';
@@ -47,21 +48,34 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildUI() {
     return Padding(
-      padding: EdgeInsets.all(8.0),
-      child: DashChat(
-          messageOptions: MessageOptions(
-            showOtherUsersAvatar: true,
-            showTime: true,
-          ),
-          inputOptions: InputOptions(
-            alwaysShowSend: true,
-          ),
-          currentUser: currentUser!,
-          onSend: (message) {
-            _sendMessage(message);
+        padding: EdgeInsets.all(8.0),
+        child: StreamBuilder(
+          stream: _databaseService.getChatData(
+              uid1: currentUser!.id, uid2: otherUser!.id),
+          builder: (context, snapshot) {
+            //extracting message from chat we are receiving
+            Chat? chat = snapshot.data?.data();
+            //now cnverting meassge and cnverting int ChatMessage so tha dash chat can understand.
+            List<ChatMessage> messages = [];
+            if (chat != null && chat.messages != null) {
+              messages = _generateChatMessageList(chat.messages!);
+            }
+            return DashChat(
+              messageOptions: const MessageOptions(
+                showOtherUsersAvatar: true,
+                showTime: true,
+              ),
+              inputOptions: const InputOptions(
+                alwaysShowSend: true,
+              ),
+              currentUser: currentUser!,
+              onSend: (message) {
+                _sendMessage(message);
+              },
+              messages: messages,
+            );
           },
-          messages: []),
-    );
+        ));
   }
 
   //before adding it to database we firstt need to convert ChatMessage to Message
@@ -74,5 +88,19 @@ class _ChatPageState extends State<ChatPage> {
 
     await _databaseService.sendChatMessage(
         uid1: currentUser!.id, uid2: otherUser!.id, message: message);
+  }
+
+  List<ChatMessage> _generateChatMessageList(List<Message> messages) {
+    List<ChatMessage> chatMessage = messages.map((m) {
+      return ChatMessage(
+          user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
+          text: m.content!,
+          createdAt: m.sentAt!.toDate());
+    }).toList();
+    chatMessage.sort((a, b) {
+      return b.createdAt.compareTo(a.createdAt);
+    });
+
+    return chatMessage;
   }
 }

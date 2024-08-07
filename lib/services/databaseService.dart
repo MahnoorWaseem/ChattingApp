@@ -89,6 +89,15 @@ class DatabaseService {
       },
     );
   }
+
+  Stream<DocumentSnapshot<Chat>> getChatData({
+    required String uid1,
+    required String uid2,
+  }) {
+    String chatId = generateChatId(uid1: uid1, uid2: uid2);
+    return _chatsCollection?.doc(chatId).snapshots()
+        as Stream<DocumentSnapshot<Chat>>;
+  }
 }
 
 //whenever the instance will be created of databaseservice automatically the collectioons will be created.
