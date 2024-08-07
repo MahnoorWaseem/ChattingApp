@@ -1,5 +1,7 @@
+import 'package:chatting_app/models/chat.dart';
 import 'package:chatting_app/models/userProfile.dart';
 import 'package:chatting_app/services/authServices.dart';
+import 'package:chatting_app/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
 
@@ -7,8 +9,8 @@ class DatabaseService {
   final GetIt _getIt = GetIt.instance;
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   CollectionReference? _usersCollection;
-late AuthService _authService;
-
+  CollectionReference? _chatsCollection;
+  late AuthService _authService;
 
   DatabaseService() {
     _setUpCollectionRef();
@@ -22,6 +24,13 @@ late AuthService _authService;
                   .data()!), //instated of default constructor wer calling fromjson(named)consructor.
               toFirestore: (userProfile, options) => userProfile.toJson(),
             );
+
+    _chatsCollection = _firebaseFirestore
+        .collection('chats')
+        .withConverter<Chat>(
+          fromFirestore: (snapshot, options) => Chat.fromJson(snapshot.data()!),
+          toFirestore: (chat, options) => chat.toJson(),
+        );
   }
 
   //to add document (individdual profile in user collection)
@@ -30,10 +39,35 @@ late AuthService _authService;
   }
 
   //getting all the users wexcept the current user
-Stream<QuerySnapshot<UserProfile>> getUserProfile(){
-  return _usersCollection?.where(
-    "uid", isNotEqualTo: _authService.user!.uid).snapshots() as Stream<QuerySnapshot<UserProfile>>; //gives documents ha satisfy criteria
-}
+  Stream<QuerySnapshot<UserProfile>> getUserProfile() {
+    return _usersCollection
+            ?.where("uid", isNotEqualTo: _authService.user!.uid)
+            .snapshots()
+        as Stream<
+            QuerySnapshot<UserProfile>>; //gives documents ha satisfy criteria
+  }
+
+  Future<bool> checkChatExits({
+    required String uid1,
+    required String uid2,
+  }) async {
+    String chatId = generateChatId(uid1: uid1, uid2: uid2);
+    final res = await _chatsCollection?.doc(chatId).get();
+    if (res != null) {
+      return res.exists;
+    }
+    return false;
+  }
+
+  Future<void> createNewChat({
+    required String uid1,
+    required String uid2,
+  }) async {
+    String chatId = generateChatId(uid1: uid1, uid2: uid2);
+    final docRef = _chatsCollection!.doc(chatId);
+    final chat = Chat(id: chatId, participants: [uid1, uid2], messages: []);
+    await docRef.set(chat);
+  }
 }
 
 //whenever the instance will be created of databaseservice automatically the collectioons will be created.

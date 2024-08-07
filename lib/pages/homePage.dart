@@ -5,6 +5,7 @@ import 'package:chatting_app/services/authServices.dart';
 import 'package:chatting_app/services/databaseService.dart';
 import 'package:chatting_app/widgets/chatTile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get_it/get_it.dart';
 
 class HomePage extends StatefulWidget {
@@ -85,7 +86,16 @@ class _HomePageState extends State<HomePage> {
               UserProfile user = users[index].data();
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ChatTile(userProfile: user, onTap: () {}),
+                child: ChatTile(
+                    userProfile: user,
+                    onTap: () async {
+                      final chatExists = await _databaseService.checkChatExits(
+                          uid1: _authService.user!.uid, uid2: user.uid!);
+                      if (!chatExists) {
+                        await _databaseService.createNewChat(
+                            uid1: _authService.user!.uid, uid2: user.uid!);
+                      }
+                    }),
               );
             },
           );

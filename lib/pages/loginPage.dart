@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _loginFormKey = GlobalKey();
   String? email, password;
 
-  void clearFormFields (){
+  void clearFormFields() {
     _loginFormKey.currentState?.reset();
     setState(() {
       email = null;
@@ -162,10 +162,17 @@ class _LoginPageState extends State<LoginPage> {
             bool result = await _authService.login(email!, password!);
             if (result) {
               // debugPrint(result.toString());
-Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(),));
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomePage(),
+                  ));
             } else {
-_alertService.showToast(context: context, text: "Failed to Login, Please try again!", icon: Icons.error);
-clearFormFields();
+              _alertService.showToast(
+                  context: context,
+                  text: "Failed to Login, Please try again!",
+                  icon: Icons.error);
+              clearFormFields();
             }
           }
         },
@@ -182,7 +189,7 @@ clearFormFields();
 
   //3. bottom Link
   Widget _createAnAccountLink() {
-    return  Padding(
+    return Padding(
       padding: EdgeInsets.only(top: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -192,8 +199,12 @@ clearFormFields();
             width: 5,
           ),
           GestureDetector(
-            onTap:(){
-Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage(),));
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RegisterPage(),
+                  ));
             },
             child: Text(
               "Sign Up",
