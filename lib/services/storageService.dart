@@ -21,8 +21,25 @@ class StorageService {
     UploadTask task = fileRef.putFile(file);
     return task.then(
       (p) {
-        if (p.state  == TaskState.success) {
-          return fileRef.getDownloadURL(); //if upload task is completed then it will return a downloadable link othrwis null
+        if (p.state == TaskState.success) {
+          return fileRef
+              .getDownloadURL(); //if upload task is completed then it will return a downloadable link othrwis null
+        }
+      },
+    );
+  }
+
+  Future<String?> uploadImageToChat(
+      {required File file, required String chatId}) async {
+    Reference fileRef = _firebaseStorage
+        .ref('chats/$chatId')
+        .child('${DateTime.now().toIso8601String()}${p.extension(file.path)}');
+
+    UploadTask task = fileRef.putFile(file);
+    return task.then(
+      (p) {
+        if (p.state == TaskState.success) {
+          return fileRef.getDownloadURL();
         }
       },
     );

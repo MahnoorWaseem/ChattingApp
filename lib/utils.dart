@@ -27,12 +27,17 @@ Future<void> registerServices() async {
   getIt.registerSingleton<DatabaseService>(DatabaseService());
 }
 
-String generateChatId ({
+String generateChatId({
   required String uid1,
   required String uid2,
-}){
-List uids = [uid1, uid2];
-uids.sort();
-String chatId = uids.fold("", (previousValue, element) => "$uid1$uid2",);
-return chatId;
+}) {
+  List uids = [uid1, uid2];
+  print('start');
+  print('initially : $uids');
+  uids.sort();
+  print('uids are $uids');
+  String chatId = uids.join();
+  print('finL $chatId');
+  print('end');
+  return chatId;
 }

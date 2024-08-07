@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:chatting_app/models/chat.dart';
 import 'package:chatting_app/models/message.dart';
 import 'package:chatting_app/models/userProfile.dart';
 import 'package:chatting_app/services/authServices.dart';
 import 'package:chatting_app/services/databaseService.dart';
+import 'package:chatting_app/services/mediaService.dart';
+import 'package:chatting_app/services/storageService.dart';
+import 'package:chatting_app/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
@@ -19,6 +24,8 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late AuthService _authService;
   late DatabaseService _databaseService;
+  late Mediaservice _mediaservice;
+  late StorageService _storageService;
   final GetIt _getIt = GetIt.instance;
   ChatUser? currentUser, otherUser;
 
@@ -27,7 +34,8 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     _authService = _getIt.get<AuthService>();
     _databaseService = _getIt.get<DatabaseService>();
-
+    _mediaservice = _getIt.get<Mediaservice>();
+    _storageService = _getIt.get<StorageService>();
     currentUser = ChatUser(
         id: _authService.user!.uid, firstName: _authService.user!.displayName);
     otherUser = ChatUser(
@@ -65,7 +73,10 @@ class _ChatPageState extends State<ChatPage> {
                 showOtherUsersAvatar: true,
                 showTime: true,
               ),
-              inputOptions: const InputOptions(
+              inputOptions: InputOptions(
+                trailing: [
+                  _mediaMessageButton(),
+                ],
                 alwaysShowSend: true,
               ),
               currentUser: currentUser!,
@@ -79,28 +90,80 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   //before adding it to database we firstt need to convert ChatMessage to Message
+  //to send messages
   Future<void> _sendMessage(ChatMessage chatMessage) async {
-    Message message = Message(
-        senderID: currentUser!.id,
-        content: chatMessage.text,
-        messageType: MessageType.Text,
-        sentAt: Timestamp.fromDate(chatMessage.createdAt));
+    if (chatMessage.medias?.isNotEmpty ?? false) {
+//to ensure user can also send image media
+      if (chatMessage.medias!.first.type == MediaType.image) {
+        Message message = Message(
+            senderID: currentUser!.id,
+            content: chatMessage.medias!.first.url,
+            messageType: MessageType.Image,
+            sentAt: Timestamp.fromDate(chatMessage.createdAt));
 
-    await _databaseService.sendChatMessage(
-        uid1: currentUser!.id, uid2: otherUser!.id, message: message);
+        await _databaseService.sendChatMessage(
+            uid1: currentUser!.id, uid2: otherUser!.id, message: message);
+      }
+    } else {
+      Message message = Message(
+          senderID: currentUser!.id,
+          content: chatMessage.text,
+          messageType: MessageType.Text,
+          sentAt: Timestamp.fromDate(chatMessage.createdAt));
+
+      await _databaseService.sendChatMessage(
+          uid1: currentUser!.id, uid2: otherUser!.id, message: message);
+    }
   }
 
+//to render msgs
   List<ChatMessage> _generateChatMessageList(List<Message> messages) {
     List<ChatMessage> chatMessage = messages.map((m) {
-      return ChatMessage(
-          user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
-          text: m.content!,
-          createdAt: m.sentAt!.toDate());
+      if (m.messageType == MessageType.Image) {
+        return ChatMessage(
+            user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
+            createdAt: m.sentAt!.toDate(),
+            medias: [
+              ChatMedia(url: m.content!, fileName: "", type: MediaType.image)
+            ]);
+      } else {
+        return ChatMessage(
+            user: m.senderID == currentUser!.id ? currentUser! : otherUser!,
+            text: m.content!,
+            createdAt: m.sentAt!.toDate());
+      }
     }).toList();
     chatMessage.sort((a, b) {
       return b.createdAt.compareTo(a.createdAt);
     });
 
     return chatMessage;
+  }
+
+  Widget _mediaMessageButton() {
+    return IconButton(
+        onPressed: () async {
+          File? file = await _mediaservice.getImageFromGallery();
+          if (file != null) {
+            String chatId =
+                generateChatId(uid1: currentUser!.id, uid2: otherUser!.id);
+            String? downloadUrl = await _storageService.uploadImageToChat(
+                file: file, chatId: chatId);
+            if (downloadUrl != null) {
+              ChatMessage chatMessage = ChatMessage(
+                  user: currentUser!,
+                  createdAt: DateTime.now(),
+                  medias: [
+                    ChatMedia(
+                        url: downloadUrl, fileName: "", type: MediaType.image)
+                  ]);
+              _sendMessage(chatMessage);
+            }
+          }
+        },
+        icon: Icon(
+          Icons.image,
+          color: Theme.of(context).colorScheme.primary,
+        ));
   }
 }
