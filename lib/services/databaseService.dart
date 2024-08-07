@@ -1,4 +1,5 @@
 import 'package:chatting_app/models/chat.dart';
+import 'package:chatting_app/models/message.dart';
 import 'package:chatting_app/models/userProfile.dart';
 import 'package:chatting_app/services/authServices.dart';
 import 'package:chatting_app/utils.dart';
@@ -67,6 +68,26 @@ class DatabaseService {
     final docRef = _chatsCollection!.doc(chatId);
     final chat = Chat(id: chatId, participants: [uid1, uid2], messages: []);
     await docRef.set(chat);
+  }
+
+  Future<void> sendChatMessage({
+    required String uid1,
+    required String uid2,
+    required Message message,
+  }) async {
+    String chatId = generateChatId(uid1: uid1, uid2: uid2);
+    final docRef = _chatsCollection!.doc(chatId);
+//we want to update this doc
+    await docRef.update(
+      {
+        //map with id mssages
+        "messages": FieldValue.arrayUnion(
+          [
+            message.toJson(), //add this mssage to the existing array
+          ],
+        ),
+      },
+    );
   }
 }
 

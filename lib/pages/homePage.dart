@@ -1,4 +1,5 @@
 import 'package:chatting_app/models/userProfile.dart';
+import 'package:chatting_app/pages/chatPage.dart';
 import 'package:chatting_app/pages/loginPage.dart';
 import 'package:chatting_app/services/alertService.dart';
 import 'package:chatting_app/services/authServices.dart';
@@ -95,6 +96,11 @@ class _HomePageState extends State<HomePage> {
                         await _databaseService.createNewChat(
                             uid1: _authService.user!.uid, uid2: user.uid!);
                       }
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatPage(chatUser: user),
+                          ));
                     }),
               );
             },
