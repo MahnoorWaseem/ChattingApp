@@ -1,12 +1,18 @@
 import 'package:chatting_app/models/userProfile.dart';
+import 'package:chatting_app/services/authServices.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get_it/get_it.dart';
 
 class DatabaseService {
+  final GetIt _getIt = GetIt.instance;
   final FirebaseFirestore _firebaseFirestore = FirebaseFirestore.instance;
   CollectionReference? _usersCollection;
+late AuthService _authService;
+
 
   DatabaseService() {
     _setUpCollectionRef();
+    _authService = _getIt.get<AuthService>();
   }
 
   void _setUpCollectionRef() {
@@ -22,6 +28,12 @@ class DatabaseService {
   Future<void> createUserProfile({required UserProfile userProfile}) async {
     await _usersCollection?.doc(userProfile.uid).set(userProfile);
   }
+
+  //getting all the users wexcept the current user
+Stream<QuerySnapshot<UserProfile>> getUserProfile(){
+  return _usersCollection?.where(
+    "uid", isNotEqualTo: _authService.user!.uid).snapshots() as Stream<QuerySnapshot<UserProfile>>; //gives documents ha satisfy criteria
+}
 }
 
 //whenever the instance will be created of databaseservice automatically the collectioons will be created.
