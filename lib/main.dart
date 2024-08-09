@@ -18,16 +18,16 @@ Future<void> setup() async {
   await registerServices();
 }
 
-
 class MyApp extends StatelessWidget {
   final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-       title: 'Flutter Demo',
+      title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Color(0xffe53854), primary: Color(0xffe53854)),
         useMaterial3: true,
         textTheme: GoogleFonts.montserratTextTheme(),
       ),

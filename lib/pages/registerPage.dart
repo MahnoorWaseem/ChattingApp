@@ -56,6 +56,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xff24253c),
       resizeToAvoidBottomInset: false,
       body: _buildUI(),
     );
@@ -93,20 +94,9 @@ class _RegisterPageState extends State<RegisterPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Let's get going!",
+            "Register",
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            "Register an account using the form below",
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey,
-              // fontFamily: GoogleFonts.montserratTextTheme().toString(),
-            ),
+                fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white),
           ),
         ],
       ),
@@ -184,6 +174,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
         color: Theme.of(context).colorScheme.primary,
         onPressed: () async {
           setState(() {
@@ -255,7 +246,10 @@ class _RegisterPageState extends State<RegisterPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text("Already have an account?"),
+        const Text(
+          "Already have an account?",
+          style: TextStyle(color: Colors.white),
+        ),
         const SizedBox(
           width: 5,
         ),
@@ -269,7 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
           },
           child: const Text(
             "Login",
-            style: TextStyle(fontWeight: FontWeight.w800),
+            style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white),
           ),
         ),
       ],

@@ -39,6 +39,22 @@ class DatabaseService {
     await _usersCollection?.doc(userProfile.uid).set(userProfile);
   }
 
+Future<UserProfile?> getCurrentUser() async {
+  final querySnapshot = await _usersCollection!
+      .where("uid", isEqualTo: _authService.user!.uid)
+      .withConverter<UserProfile>(
+        fromFirestore: (snapshot, _) => UserProfile.fromJson(snapshot.data()!),
+        toFirestore: (user, _) => user.toJson(),
+      )
+      .get(); // Execute the query
+
+  if (querySnapshot.docs.isNotEmpty) {
+    return querySnapshot.docs.first.data(); // Return the first matching UserProfile
+  }
+  return null; // Return null if no matching user is found
+}
+
+
   //getting all the users wexcept the current user
   Stream<QuerySnapshot<UserProfile>> getUserProfile() {
     return _usersCollection

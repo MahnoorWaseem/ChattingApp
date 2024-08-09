@@ -32,12 +32,7 @@ String generateChatId({
   required String uid2,
 }) {
   List uids = [uid1, uid2];
-  print('start');
-  print('initially : $uids');
   uids.sort();
-  print('uids are $uids');
   String chatId = uids.join();
-  print('finL $chatId');
-  print('end');
   return chatId;
 }

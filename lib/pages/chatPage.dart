@@ -47,8 +47,31 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xff24253c),
       appBar: AppBar(
-        title: Text(widget.chatUser.name!),
+        backgroundColor: Color(0xff24253c),
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(children: [
+            CircleAvatar(
+              backgroundImage: NetworkImage(widget.chatUser.pfpURL!),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            Text(
+              widget.chatUser.name!,
+              style: TextStyle(color: Colors.white),
+            ),
+          ]),
+        ),
       ),
       body: _buildUI(),
     );

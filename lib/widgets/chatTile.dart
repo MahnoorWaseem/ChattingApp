@@ -9,12 +9,17 @@ class ChatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onTap: (){
+      onTap: () {
         onTap();
       },
       dense: false,
-      leading: CircleAvatar(backgroundImage: NetworkImage(userProfile.pfpURL!),),
-    title: Text(userProfile.name!,),
+      leading: CircleAvatar(
+        backgroundImage: NetworkImage(userProfile.pfpURL!),
+      ),
+      title: Text(
+        userProfile.name!,
+        style: TextStyle(color: Colors.white),
+      ),
     );
   }
 }

@@ -46,6 +46,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xff24253c),
       resizeToAvoidBottomInset: false, //to avoid bottom overflow
       body: _buildUI(),
     );
@@ -56,8 +57,8 @@ class _LoginPageState extends State<LoginPage> {
     return SafeArea(
         child: Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: 15.0,
-        vertical: 20.0,
+        horizontal: 20.0,
+        vertical: 30.0,
       ),
       child: Column(
         children: [
@@ -79,20 +80,9 @@ class _LoginPageState extends State<LoginPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Hi, Welcome Back!",
+            "Log In",
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            "Hello again, you've been missed",
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey,
-              // fontFamily: GoogleFonts.montserratTextTheme().toString(),
-            ),
+                fontSize: 40, fontWeight: FontWeight.w900, color: Colors.white),
           ),
         ],
       ),
@@ -153,6 +143,7 @@ class _LoginPageState extends State<LoginPage> {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
       child: MaterialButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
         onPressed: () async {
           if (_loginFormKey.currentState?.validate() ??
               false) //validate will run validators on children of form and then show message accordingly
@@ -190,11 +181,14 @@ class _LoginPageState extends State<LoginPage> {
   //3. bottom Link
   Widget _createAnAccountLink() {
     return Padding(
-      padding: EdgeInsets.only(top: 8.0),
+      padding: EdgeInsets.only(top: 30.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text("Don't have an account?"),
+          Text(
+            "Don't have an account?",
+            style: TextStyle(color: Colors.white),
+          ),
           SizedBox(
             width: 5,
           ),
@@ -208,7 +202,8 @@ class _LoginPageState extends State<LoginPage> {
             },
             child: Text(
               "Sign Up",
-              style: TextStyle(fontWeight: FontWeight.w800),
+              style:
+                  TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
             ),
           ),
         ],
